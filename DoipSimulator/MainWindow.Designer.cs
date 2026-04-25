@@ -163,7 +163,8 @@
             label5.Size = new Size(36, 17);
             label5.TabIndex = 5;
             label5.Text = "MAC";
-            label5.Click += label2_Click;
+
+
             // 
             // label3
             // 
@@ -182,7 +183,8 @@
             label4.Size = new Size(30, 17);
             label4.TabIndex = 5;
             label4.Text = "VIN";
-            label4.Click += label2_Click;
+
+
             // 
             // label2
             // 
@@ -192,8 +194,7 @@
             label2.Size = new Size(55, 17);
             label2.TabIndex = 5;
             label2.Text = "udp端口";
-            label2.Click += label2_Click;
-            // 
+            //
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);

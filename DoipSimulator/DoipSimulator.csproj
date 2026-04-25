@@ -9,9 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="DoipServer">
-      <HintPath>libs\Debug\net8.0\DoipServer.dll</HintPath>
-    </Reference>
+    <ProjectReference Include="..\DoipServer\DoipServer.csproj" />
   </ItemGroup>
 
 </Project>

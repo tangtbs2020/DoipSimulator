@@ -1,4 +1,4 @@
-﻿using System.Text;
+using System.Text;
 
 namespace DOIPUtils
 {
@@ -7,20 +7,19 @@ namespace DOIPUtils
 
     internal static class LogHelper
     {
-        
-        private static bool _isLoggingEnabled = true; // 控制日志开关 
-
+        private static bool _isLoggingEnabled = true;
         private static string LogFile = string.Empty;
+
         public static void EnableLogging(bool enable)
         {
             _isLoggingEnabled = enable;
-        }   
-
-
+        }
 
         public static void InitLogFile()
         {
-            if (_isLoggingEnabled)
+            if (!_isLoggingEnabled) return;
+
+            try
             {
                 string LogDir = "log";
                 if (!Directory.Exists(LogDir))
@@ -28,36 +27,48 @@ namespace DOIPUtils
 
                 LogFile = Path.Combine(LogDir, $"log_{DateTime.Now:yyyyMMddHHmmss}.log");
             }
+            catch (Exception ex)
+            {
+                _isLoggingEnabled = false;
+                Console.WriteLine($"[Log] 日志目录创建失败，已禁用日志: {ex.Message}");
+            }
         }
 
         public static void Write(string msg, params byte[][] data)
         {
-            if (_isLoggingEnabled)
+            if (!_isLoggingEnabled) return;
+
+            try
             {
                 StringBuilder content = new StringBuilder($"[{DateTime.Now:HH:mm:ss:fff}] {msg}");
-                if(data.Length > 0)
+                if (data.Length > 0)
                 {
-                    foreach(var one in data)
+                    foreach (var one in data)
                     {
                         content.Append(" data: " + string.Join(" ", one.Select(x => x.ToString("X2"))));
                     }
-           
                 }
                 content.Append(Environment.NewLine);
                 File.AppendAllText(LogFile, content.ToString());
-                //Console.WriteLine(content); // 同时打印控制台
             }
-
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Log] 写入失败: {ex.Message}");
+            }
         }
 
         public static void WritePlainText(string msg)
         {
-            if (_isLoggingEnabled)
+            if (!_isLoggingEnabled) return;
+
+            try
             {
                 File.AppendAllText(LogFile, msg);
             }
-
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Log] 写入失败: {ex.Message}");
+            }
         }
-
     }
 }
