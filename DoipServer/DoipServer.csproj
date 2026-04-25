@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <BaseOutputPath>D:\tb\code\csharp\DoipSimulator\DoipSimulator\libs</BaseOutputPath>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="doipClient.cs" />
+  </ItemGroup>
+
+</Project>

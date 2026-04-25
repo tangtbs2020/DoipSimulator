@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="DoipServer/DoipServer.csproj" />
+  <Project Path="DoipSimulator/DoipSimulator.csproj" />
+</Solution>
