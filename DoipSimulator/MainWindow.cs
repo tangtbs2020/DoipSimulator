@@ -94,6 +94,12 @@ namespace DoipSimulator
 
         private void buttonConnect_Click(object sender, EventArgs e)
         {
+            if(treeViewFiles.SelectedNode == null)
+            {
+                MessageBox.Show("请选择一个有效的文件！");
+                return;
+            }
+
             var strPath = treeViewFiles.SelectedNode.Tag as string;
             if (strPath == null || !File.Exists(strPath))
             {
