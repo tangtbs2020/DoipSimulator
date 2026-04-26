@@ -107,6 +107,7 @@ namespace DoipSimulator
             }
 
             var listData = EthernetDataParser.ParseFile(strPath);
+            DOIP.SetEthernetData(listData);
             var info = new DOIP.Information();
             string? IP = ComboBoxIP.SelectedItem as string;
             if (string.IsNullOrEmpty(IP))
