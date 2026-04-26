@@ -89,7 +89,12 @@ namespace DoipSimulator
         {
             if (_serverRunning)
             {
-                MessageBox.Show("服务已在运行中！");
+                // 断开连接
+                DOIP.StopDoipServer();
+                _serverRunning = false;
+                SetControlsEnabled(true);
+                buttonConnect.Text = "连接";
+                AppendStatus("服务已停止。");
                 return;
             }
 
@@ -154,9 +159,22 @@ namespace DoipSimulator
 
             DOIP.StartDoipServer(info);
             _serverRunning = true;
-            buttonConnect.Enabled = false;
+            SetControlsEnabled(false);
+            buttonConnect.Text = "断开";
             AppendStatus($"服务已启动 → {IP}:{info.TCPPort} (TCP) / {info.UDPPort} (UDP)");
             AppendStatus($"数据文件: {Path.GetFileName(strPath)}");
+        }
+
+        // 连接后禁用所有控件，仅保留连接按钮和日志面板可用
+        private void SetControlsEnabled(bool enabled)
+        {
+            treeViewFiles.Enabled = enabled;
+            ComboBoxIP.Enabled = enabled;
+            buttonUpdateIP.Enabled = enabled;
+            textBoxUdpPort.Enabled = enabled;
+            textBoxTcpPort.Enabled = enabled;
+            textBoxVIN.Enabled = enabled;
+            textBoxMAC.Enabled = enabled;
         }
 
         private void MainWindow_FormClosing(object? sender, FormClosingEventArgs e)
@@ -171,7 +189,6 @@ namespace DoipSimulator
         private void buttonUpdateIP_Click(object sender, EventArgs e)
         {
             initIPList();
-            AppendStatus("IP列表已刷新。");
         }
 
         private void AppendStatus(string msg)
