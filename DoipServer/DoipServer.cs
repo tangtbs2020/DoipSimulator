@@ -203,6 +203,7 @@ namespace DOIPUtils
                                 Array.Copy(payload, 0, fullMessage, header.Length, payload.Length);
 
                                 LogHelper.Write($"[recv]", fullMessage);
+                                DOIP.RaiseDataReceived(fullMessage);
 
                                 var listAns = EthernetData?.Where(x => fullMessage.SequenceEqual(x.RequestData));
                                 if (listAns != null && listAns.Any())
@@ -215,6 +216,7 @@ namespace DOIPUtils
                                             try
                                             {
                                                 SendDoipMessage(stream, response);
+                                                DOIP.RaiseDataSent(response);
                                             }
                                             catch (Exception ex)
                                             {

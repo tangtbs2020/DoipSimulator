@@ -13,6 +13,12 @@ namespace DOIPUtils
             public int TCPPort { get; set; } = 6801;
         }
 
+        public static event Action<byte[]>? OnDataReceived;
+        public static event Action<byte[]>? OnDataSent;
+
+        internal static void RaiseDataReceived(byte[] data) => OnDataReceived?.Invoke(data);
+        internal static void RaiseDataSent(byte[] data) => OnDataSent?.Invoke(data);
+
         public static void SetEthernetData(List<DataGroup> dataGroups)
         {
             DoIPServer.SetEthernetData(dataGroups);

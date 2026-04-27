@@ -13,6 +13,8 @@ namespace DoipSimulator
             InitializeComponent();
             init();
             FormClosing += MainWindow_FormClosing;
+            DOIP.OnDataReceived += OnDataReceived;
+            DOIP.OnDataSent += OnDataSent;
         }
 
         void init()
@@ -189,6 +191,37 @@ namespace DoipSimulator
         private void buttonUpdateIP_Click(object sender, EventArgs e)
         {
             initIPList();
+        }
+
+        private void OnDataReceived(byte[] data)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(() => OnDataReceived(data));
+                return;
+            }
+            string hex = string.Join(" ", data.Select(b => b.ToString("X2")));
+            AppendColoredText($"Req: {hex}{Environment.NewLine}", Color.Blue);
+        }
+
+        private void OnDataSent(byte[] data)
+        {
+            if (InvokeRequired)
+            {
+                Invoke(() => OnDataSent(data));
+                return;
+            }
+            string hex = string.Join(" ", data.Select(b => b.ToString("X2")));
+            AppendColoredText($"Ans: {hex}{Environment.NewLine}", Color.DarkGreen);
+        }
+
+        private void AppendColoredText(string text, Color color)
+        {
+            richTextBoxContent.SelectionStart = richTextBoxContent.TextLength;
+            richTextBoxContent.SelectionLength = 0;
+            richTextBoxContent.SelectionColor = color;
+            richTextBoxContent.AppendText(text);
+            richTextBoxContent.SelectionColor = richTextBoxContent.ForeColor;
         }
 
         private void AppendStatus(string msg)
