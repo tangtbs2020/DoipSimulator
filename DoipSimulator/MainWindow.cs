@@ -7,6 +7,8 @@ namespace DoipSimulator
     public partial class MainWindow : Form
     {
         private bool _serverRunning = false;
+        private bool _logHidden = false;
+        private string _dataDbPath = "";
 
         public MainWindow()
         {
@@ -15,11 +17,32 @@ namespace DoipSimulator
             FormClosing += MainWindow_FormClosing;
             DOIP.OnDataReceived += OnDataReceived;
             DOIP.OnDataSent += OnDataSent;
+            DOIP.OnAutoReplySent += OnAutoReplySent;
+            treeViewFiles.AfterSelect += TreeViewFiles_AfterSelect;
         }
 
         void init()
         {
-            LoadDirectory("DataDB");
+            var config = AppConfig.Load();
+            if (string.IsNullOrEmpty(config.DataDB))
+            {
+                MessageBox.Show("配置文件中未设置 DataDB 路径，请在 config.json 中配置 DataDB 字段。",
+                    "配置缺失", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            _dataDbPath = config.DataDB;
+            if (!Path.IsPathRooted(_dataDbPath))
+                _dataDbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, _dataDbPath);
+
+            if (!Directory.Exists(_dataDbPath))
+            {
+                MessageBox.Show($"DataDB 目录不存在:\n{_dataDbPath}\n\n请检查 config.json 中的 DataDB 配置。",
+                    "路径无效", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            LoadDirectory(_dataDbPath);
             initIPList();
             AppendStatus("就绪，请选择数据文件并配置参数后点击「连接」。");
         }
@@ -177,6 +200,7 @@ namespace DoipSimulator
             textBoxTcpPort.Enabled = enabled;
             textBoxVIN.Enabled = enabled;
             textBoxMAC.Enabled = enabled;
+            checkBoxAutoReply.Enabled = enabled;
         }
 
         private void MainWindow_FormClosing(object? sender, FormClosingEventArgs e)
@@ -188,6 +212,40 @@ namespace DoipSimulator
             }
         }
 
+        private void checkBoxAutoReply_CheckedChanged(object sender, EventArgs e)
+        {
+            DOIP.SetAutoReply(checkBoxAutoReply.Checked);
+        }
+
+        private void buttonClear_Click(object sender, EventArgs e)
+        {
+            richTextBoxContent.Clear();
+        }
+
+        private void TreeViewFiles_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            var parts = new List<string>();
+            TreeNode? node = e.Node;
+            while (node != null)
+            {
+                parts.Add(node.Text);
+                node = node.Parent;
+            }
+            parts.Reverse();
+            labelFilePath.Text = string.Join(" / ", parts);
+        }
+
+        private void toolStripMenuItemRefresh_Click(object sender, EventArgs e)
+        {
+            LoadDirectory(_dataDbPath);
+        }
+
+        private void buttonHide_Click(object sender, EventArgs e)
+        {
+            _logHidden = !_logHidden;
+            buttonHide.Text = _logHidden ? "显示" : "隐藏";
+        }
+
         private void buttonUpdateIP_Click(object sender, EventArgs e)
         {
             initIPList();
@@ -195,6 +253,7 @@ namespace DoipSimulator
 
         private void OnDataReceived(byte[] data)
         {
+            if (_logHidden) return;
             if (InvokeRequired)
             {
                 Invoke(() => OnDataReceived(data));
@@ -206,6 +265,7 @@ namespace DoipSimulator
 
         private void OnDataSent(byte[] data)
         {
+            if (_logHidden) return;
             if (InvokeRequired)
             {
                 Invoke(() => OnDataSent(data));
@@ -213,6 +273,18 @@ namespace DoipSimulator
             }
             string hex = string.Join(" ", data.Select(b => b.ToString("X2")));
             AppendColoredText($"Ans: {hex}{Environment.NewLine}", Color.DarkGreen);
+        }
+
+        private void OnAutoReplySent(byte[] data)
+        {
+            if (_logHidden) return;
+            if (InvokeRequired)
+            {
+                Invoke(() => OnAutoReplySent(data));
+                return;
+            }
+            string hex = string.Join(" ", data.Select(b => b.ToString("X2")));
+            AppendColoredText($"自动: {hex}{Environment.NewLine}", Color.DarkOrange);
         }
 
         private void AppendColoredText(string text, Color color)
@@ -226,6 +298,7 @@ namespace DoipSimulator
 
         private void AppendStatus(string msg)
         {
+            if (_logHidden) return;
             if (InvokeRequired)
             {
                 Invoke(() => AppendStatus(msg));

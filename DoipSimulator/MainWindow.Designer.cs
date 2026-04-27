@@ -28,8 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
+            components = new System.ComponentModel.Container();
             richTextBoxContent = new RichTextBox();
             treeViewFiles = new TreeView();
+            contextMenuStrip = new ContextMenuStrip(components);
+            toolStripMenuItemRefresh = new ToolStripMenuItem();
             buttonConnect = new Button();
             ComboBoxIP = new ComboBox();
             buttonUpdateIP = new Button();
@@ -43,6 +46,11 @@
             label3 = new Label();
             label4 = new Label();
             label2 = new Label();
+            checkBoxAutoReply = new CheckBox();
+            buttonClear = new Button();
+            buttonHide = new Button();
+            labelFilePath = new Label();
+            contextMenuStrip.SuspendLayout();
             groupBox1.SuspendLayout();
             SuspendLayout();
             // 
@@ -56,16 +64,30 @@
             // 
             // treeViewFiles
             // 
+            treeViewFiles.ContextMenuStrip = contextMenuStrip;
             treeViewFiles.Location = new Point(582, 12);
             treeViewFiles.Name = "treeViewFiles";
             treeViewFiles.Size = new Size(323, 463);
             treeViewFiles.TabIndex = 2;
             // 
+            // contextMenuStrip
+            // 
+            contextMenuStrip.Items.AddRange(new ToolStripItem[] { toolStripMenuItemRefresh });
+            contextMenuStrip.Name = "contextMenuStrip";
+            contextMenuStrip.Size = new Size(101, 26);
+            // 
+            // toolStripMenuItemRefresh
+            // 
+            toolStripMenuItemRefresh.Name = "toolStripMenuItemRefresh";
+            toolStripMenuItemRefresh.Size = new Size(100, 22);
+            toolStripMenuItemRefresh.Text = "刷新";
+            toolStripMenuItemRefresh.Click += toolStripMenuItemRefresh_Click;
+            // 
             // buttonConnect
             // 
             buttonConnect.Location = new Point(582, 485);
             buttonConnect.Name = "buttonConnect";
-            buttonConnect.Size = new Size(113, 23);
+            buttonConnect.Size = new Size(75, 23);
             buttonConnect.TabIndex = 3;
             buttonConnect.Text = "连接";
             buttonConnect.UseVisualStyleBackColor = true;
@@ -84,7 +106,7 @@
             // 
             buttonUpdateIP.Location = new Point(199, 20);
             buttonUpdateIP.Name = "buttonUpdateIP";
-            buttonUpdateIP.Size = new Size(185, 25);
+            buttonUpdateIP.Size = new Size(109, 25);
             buttonUpdateIP.TabIndex = 3;
             buttonUpdateIP.Text = "更新";
             buttonUpdateIP.UseVisualStyleBackColor = true;
@@ -112,6 +134,7 @@
             groupBox1.Controls.Add(label2);
             groupBox1.Controls.Add(label1);
             groupBox1.Controls.Add(ComboBoxIP);
+            groupBox1.Controls.Add(checkBoxAutoReply);
             groupBox1.Location = new Point(3, 12);
             groupBox1.Name = "groupBox1";
             groupBox1.Size = new Size(573, 165);
@@ -121,7 +144,7 @@
             // 
             // textBoxTcpPort
             // 
-            textBoxTcpPort.Location = new Point(243, 125);
+            textBoxTcpPort.Location = new Point(426, 74);
             textBoxTcpPort.MaxLength = 6;
             textBoxTcpPort.Name = "textBoxTcpPort";
             textBoxTcpPort.Size = new Size(141, 23);
@@ -130,10 +153,10 @@
             // 
             // textBoxMAC
             // 
-            textBoxMAC.Location = new Point(229, 71);
+            textBoxMAC.Location = new Point(381, 23);
             textBoxMAC.MaxLength = 12;
             textBoxMAC.Name = "textBoxMAC";
-            textBoxMAC.Size = new Size(155, 23);
+            textBoxMAC.Size = new Size(144, 23);
             textBoxMAC.TabIndex = 6;
             textBoxMAC.Text = "001A3727DF22";
             // 
@@ -148,7 +171,7 @@
             // 
             // textBoxUdpPort
             // 
-            textBoxUdpPort.Location = new Point(71, 119);
+            textBoxUdpPort.Location = new Point(256, 74);
             textBoxUdpPort.MaxLength = 6;
             textBoxUdpPort.Name = "textBoxUdpPort";
             textBoxUdpPort.Size = new Size(95, 23);
@@ -158,18 +181,16 @@
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(187, 71);
+            label5.Location = new Point(339, 23);
             label5.Name = "label5";
             label5.Size = new Size(36, 17);
             label5.TabIndex = 5;
             label5.Text = "MAC";
-
-
             // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(187, 125);
+            label3.Location = new Point(370, 74);
             label3.Name = "label3";
             label3.Size = new Size(50, 17);
             label3.TabIndex = 5;
@@ -183,31 +204,71 @@
             label4.Size = new Size(30, 17);
             label4.TabIndex = 5;
             label4.Text = "VIN";
-
-
             // 
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(10, 119);
+            label2.Location = new Point(195, 74);
             label2.Name = "label2";
             label2.Size = new Size(55, 17);
             label2.TabIndex = 5;
             label2.Text = "udp端口";
-            //
+            // 
+            // checkBoxAutoReply
+            // 
+            checkBoxAutoReply.AutoSize = true;
+            checkBoxAutoReply.Location = new Point(9, 120);
+            checkBoxAutoReply.Name = "checkBoxAutoReply";
+            checkBoxAutoReply.Size = new Size(99, 21);
+            checkBoxAutoReply.TabIndex = 7;
+            checkBoxAutoReply.Text = "ACK自动回复";
+            checkBoxAutoReply.UseVisualStyleBackColor = true;
+            checkBoxAutoReply.CheckedChanged += checkBoxAutoReply_CheckedChanged;
+            // 
+            // buttonClear
+            // 
+            buttonClear.Location = new Point(663, 485);
+            buttonClear.Name = "buttonClear";
+            buttonClear.Size = new Size(75, 23);
+            buttonClear.TabIndex = 8;
+            buttonClear.Text = "清除";
+            buttonClear.UseVisualStyleBackColor = true;
+            buttonClear.Click += buttonClear_Click;
+            // 
+            // buttonHide
+            // 
+            buttonHide.Location = new Point(744, 485);
+            buttonHide.Name = "buttonHide";
+            buttonHide.Size = new Size(75, 23);
+            buttonHide.TabIndex = 9;
+            buttonHide.Text = "隐藏";
+            buttonHide.UseVisualStyleBackColor = true;
+            buttonHide.Click += buttonHide_Click;
+            // 
+            // labelFilePath
+            // 
+            labelFilePath.Location = new Point(3, 485);
+            labelFilePath.Name = "labelFilePath";
+            labelFilePath.Size = new Size(573, 30);
+            labelFilePath.TabIndex = 10;
+            // 
             // MainWindow
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(910, 520);
+            ClientSize = new Size(910, 544);
             Controls.Add(groupBox1);
             Controls.Add(buttonConnect);
+            Controls.Add(buttonClear);
+            Controls.Add(buttonHide);
             Controls.Add(treeViewFiles);
             Controls.Add(richTextBoxContent);
+            Controls.Add(labelFilePath);
             FormBorderStyle = FormBorderStyle.FixedSingle;
             MaximizeBox = false;
             Name = "MainWindow";
             Text = "Doip模拟器";
+            contextMenuStrip.ResumeLayout(false);
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             ResumeLayout(false);
@@ -229,5 +290,11 @@
         private Label label4;
         private TextBox textBoxMAC;
         private Label label5;
+        private CheckBox checkBoxAutoReply;
+        private Button buttonClear;
+        private Button buttonHide;
+        private Label labelFilePath;
+        private ContextMenuStrip contextMenuStrip;
+        private ToolStripMenuItem toolStripMenuItemRefresh;
     }
 }

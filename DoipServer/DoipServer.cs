@@ -17,10 +17,16 @@ namespace DOIPUtils
         private static UdpClient? _udpClient;
         private static TcpListener? _tcpServer;
         private static readonly List<TcpClient> _activeClients = [];
+        private static bool _autoReplyEnabled = false;
 
         public static void SetEthernetData(List<DataGroup> dataGroups)
         {
             EthernetData = dataGroups;
+        }
+
+        public static void SetAutoReply(bool enabled)
+        {
+            _autoReplyEnabled = enabled;
         }
 
         public static void StartServer(DOIP.Information info)
@@ -216,7 +222,6 @@ namespace DOIPUtils
                                             try
                                             {
                                                 SendDoipMessage(stream, response);
-                                                DOIP.RaiseDataSent(response);
                                             }
                                             catch (Exception ex)
                                             {
@@ -227,6 +232,10 @@ namespace DOIPUtils
                                         }
                                         if (shouldBreak) break;
                                     }
+                                }
+                                else if (_autoReplyEnabled)
+                                {
+                                    SendDoipACK(stream, payload);
                                 }
 
                                 LogHelper.WritePlainText(Environment.NewLine);
@@ -282,6 +291,7 @@ namespace DOIPUtils
             Array.Copy(payload, 0, response, 6, payload.Length);
 
             stream.Write(response, 0, response.Length);
+            DOIP.RaiseDataSent(response);
             return true;
         }
 
@@ -301,68 +311,8 @@ namespace DOIPUtils
             Array.Copy(payload, 0, response, 6, payload.Length);
 
             stream.Write(response, 0, response.Length);
-
             LogHelper.Write($"[send]", response);
-        }
-
-        // 处理诊断消息 (UDS)
-        static void ProcessDiagnosticMessage(NetworkStream stream, byte[] payload)
-        {
-            // 解析地址信息
-            byte targetAddr = payload[1];
-            byte sourceAddr = payload[0];
-
-            // 提取 UDS 数据
-            byte[] udsData = new byte[payload.Length - 2];
-            Array.Copy(payload, 2, udsData, 0, udsData.Length);
-
-            byte[]? responseData = null;
-
-            // 0x22 F1 50 (Read Data) - 模拟响应
-            if (udsData.Length >= 3 && udsData[0] == 0x22 && udsData[1] == 0xF1 && udsData[2] == 0x50)
-            {
-                responseData = new byte[] { 0x62, 0xF1, 0x50, 0x0F, 0x13, 0x10 };
-            }
-            else if (udsData.Length >= 3 && udsData[0] == 0x22 && udsData[1] == 0xF1 && udsData[2] == 0x90)
-            {
-                byte[] vinResponse = new byte[3 + DoipInfo.VIN.Length];
-                vinResponse[0] = 0x62;
-                vinResponse[1] = 0xF1;
-                vinResponse[2] = 0x90;
-                Array.Copy(Encoding.ASCII.GetBytes(DoipInfo.VIN), 0, vinResponse, 3, DoipInfo.VIN.Length);
-                responseData = vinResponse;
-            }
-            else
-            {
-                // 默认返回否定响应 0x7F 22 11 (Service Not Supported)
-                responseData = new byte[] { 0x7F, 0x22, 0x11 };
-            }
-
-            SendDoipMessage(stream, sourceAddr, targetAddr, responseData);
-        }
-
-        static void SendDoipMessage(NetworkStream stream, byte target, byte source, byte[] udsData)
-        {
-            int payloadLen = 2 + udsData.Length;
-            byte[] header = new byte[6];
-            header[0] = (byte)(payloadLen >> 24);
-            header[1] = (byte)(payloadLen >> 16);
-            header[2] = (byte)(payloadLen >> 8);
-            header[3] = (byte)(payloadLen >> 0);
-            header[4] = 0x00;
-            header[5] = 0x01;
-
-            byte[] packet = new byte[header.Length + payloadLen];
-            Array.Copy(header, packet, header.Length);
-
-            // Address Info
-            packet[6] = source;
-            packet[7] = target;
-
-            // UDS Data
-            Array.Copy(udsData, 0, packet, 8, udsData.Length);
-            stream.Write(packet, 0, packet.Length);
-            LogHelper.Write($"[send] ", packet);
+            DOIP.RaiseAutoReplySent(response);
         }
 
         static void SendDoipMessage(NetworkStream stream, byte[]? packet)
@@ -371,6 +321,7 @@ namespace DOIPUtils
             {
                 stream.Write(packet, 0, packet.Length);
                 LogHelper.Write($"[send]", packet);
+                DOIP.RaiseDataSent(packet);
             }
         }
 
@@ -389,29 +340,4 @@ namespace DOIPUtils
         }
     }
 
-    internal static class NetworkHelper
-    {
-        public static List<string> GetAllLocalIPv4()
-        {
-            List<string> ipList = new List<string>();
-
-            foreach (NetworkInterface ni in NetworkInterface.GetAllNetworkInterfaces())
-            {
-                if (ni.OperationalStatus == OperationalStatus.Up &&
-                    ni.NetworkInterfaceType != NetworkInterfaceType.Loopback)
-                {
-                    var ipProperties = ni.GetIPProperties();
-
-                    foreach (UnicastIPAddressInformation ipInfo in ipProperties.UnicastAddresses)
-                    {
-                        if (ipInfo.Address.AddressFamily == AddressFamily.InterNetwork)
-                        {
-                            ipList.Add(ipInfo.Address.ToString());
-                        }
-                    }
-                }
-            }
-            return ipList.Distinct().ToList();
-        }
-    }
 }
