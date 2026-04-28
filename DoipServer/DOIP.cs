@@ -16,10 +16,12 @@ namespace DOIPUtils
         public static event Action<byte[]>? OnDataReceived;
         public static event Action<byte[]>? OnDataSent;
         public static event Action<byte[]>? OnAutoReplySent;
+        public static event Action<byte[]>? OnUdsAutoReplySent;
 
         internal static void RaiseDataReceived(byte[] data) => OnDataReceived?.Invoke(data);
         internal static void RaiseDataSent(byte[] data) => OnDataSent?.Invoke(data);
         internal static void RaiseAutoReplySent(byte[] data) => OnAutoReplySent?.Invoke(data);
+        internal static void RaiseUdsAutoReplySent(byte[] data) => OnUdsAutoReplySent?.Invoke(data);
 
         public static void SetEthernetData(List<DataGroup> dataGroups)
         {
@@ -36,9 +38,15 @@ namespace DOIPUtils
             DoIPServer.StopServer();
         }
 
+
         public static void SetAutoReply(bool enabled)
         {
             DoIPServer.SetAutoReply(enabled);
+        }
+
+        public static void SetUdsAutoReply(bool enabled)
+        {
+            DoIPServer.SetUdsAutoReply(enabled);
         }
     }
 }

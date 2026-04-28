@@ -18,6 +18,10 @@ namespace DoipSimulator
             DOIP.OnDataReceived += OnDataReceived;
             DOIP.OnDataSent += OnDataSent;
             DOIP.OnAutoReplySent += OnAutoReplySent;
+            DOIP.OnUdsAutoReplySent += OnUdsAutoReplySent;
+
+            // 初始状态：UDS默认开启，ACK随之强制开启并禁用
+            checkBoxAutoReply.Enabled = false;
             treeViewFiles.AfterSelect += TreeViewFiles_AfterSelect;
         }
 
@@ -200,7 +204,9 @@ namespace DoipSimulator
             textBoxTcpPort.Enabled = enabled;
             textBoxVIN.Enabled = enabled;
             textBoxMAC.Enabled = enabled;
-            checkBoxAutoReply.Enabled = enabled;
+            // ACK复选框在UDS自动回复开启时强制禁用
+            checkBoxAutoReply.Enabled = enabled && !checkBoxUdsAutoReply.Checked;
+            checkBoxUdsAutoReply.Enabled = enabled;
         }
 
         private void MainWindow_FormClosing(object? sender, FormClosingEventArgs e)
@@ -212,6 +218,22 @@ namespace DoipSimulator
             }
         }
 
+        private void checkBoxUdsAutoReply_CheckedChanged(object sender, EventArgs e)
+        {
+            bool enabled = checkBoxUdsAutoReply.Checked;
+            DOIP.SetUdsAutoReply(enabled);
+
+            // UDS自动回复开启时，强制开启ACK自动回复并禁用其复选框
+            if (enabled)
+            {
+                checkBoxAutoReply.Checked = true;
+                checkBoxAutoReply.Enabled = false;
+            }
+            else
+            {
+                checkBoxAutoReply.Enabled = true;
+            }
+        }
         private void checkBoxAutoReply_CheckedChanged(object sender, EventArgs e)
         {
             DOIP.SetAutoReply(checkBoxAutoReply.Checked);
@@ -285,6 +307,18 @@ namespace DoipSimulator
             }
             string hex = string.Join(" ", data.Select(b => b.ToString("X2")));
             AppendColoredText($"自动: {hex}{Environment.NewLine}", Color.DarkOrange);
+        }
+
+        private void OnUdsAutoReplySent(byte[] data)
+        {
+            if (_logHidden) return;
+            if (InvokeRequired)
+            {
+                Invoke(() => OnUdsAutoReplySent(data));
+                return;
+            }
+            string hex = string.Join(" ", data.Select(b => b.ToString("X2")));
+            AppendColoredText($"自动: {hex}{Environment.NewLine}", Color.DodgerBlue);
         }
 
         private void AppendColoredText(string text, Color color)

@@ -47,6 +47,7 @@
             label4 = new Label();
             label2 = new Label();
             checkBoxAutoReply = new CheckBox();
+            checkBoxUdsAutoReply = new CheckBox();
             buttonClear = new Button();
             buttonHide = new Button();
             labelFilePath = new Label();
@@ -135,6 +136,7 @@
             groupBox1.Controls.Add(label1);
             groupBox1.Controls.Add(ComboBoxIP);
             groupBox1.Controls.Add(checkBoxAutoReply);
+            groupBox1.Controls.Add(checkBoxUdsAutoReply);
             groupBox1.Location = new Point(3, 12);
             groupBox1.Name = "groupBox1";
             groupBox1.Size = new Size(573, 165);
@@ -223,14 +225,27 @@
             checkBoxAutoReply.TabIndex = 7;
             checkBoxAutoReply.Text = "ACK自动回复";
             checkBoxAutoReply.UseVisualStyleBackColor = true;
+            checkBoxAutoReply.Checked = true;
             checkBoxAutoReply.CheckedChanged += checkBoxAutoReply_CheckedChanged;
+            // 
+            // checkBoxUdsAutoReply
+            // 
+            checkBoxUdsAutoReply.AutoSize = true;
+            checkBoxUdsAutoReply.Location = new Point(115, 120);
+            checkBoxUdsAutoReply.Name = "checkBoxUdsAutoReply";
+            checkBoxUdsAutoReply.Size = new Size(108, 21);
+            checkBoxUdsAutoReply.TabIndex = 8;
+            checkBoxUdsAutoReply.Text = "UDS自动回复";
+            checkBoxUdsAutoReply.UseVisualStyleBackColor = true;
+            checkBoxUdsAutoReply.Checked = true;
+            checkBoxUdsAutoReply.CheckedChanged += checkBoxUdsAutoReply_CheckedChanged;
             // 
             // buttonClear
             // 
             buttonClear.Location = new Point(663, 485);
             buttonClear.Name = "buttonClear";
             buttonClear.Size = new Size(75, 23);
-            buttonClear.TabIndex = 8;
+            buttonClear.TabIndex = 9;
             buttonClear.Text = "清除";
             buttonClear.UseVisualStyleBackColor = true;
             buttonClear.Click += buttonClear_Click;
@@ -278,6 +293,7 @@
         private RichTextBox richTextBoxContent;
         private TreeView treeViewFiles;
         private Button buttonConnect;
+        private CheckBox checkBoxUdsAutoReply;
         private ComboBox ComboBoxIP;
         private Button buttonUpdateIP;
         private Label label1;
