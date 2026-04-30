@@ -20,6 +20,9 @@ namespace DOIPUtils
         private static bool _autoReplyEnabled = true;
         private static bool _udsAutoReplyEnabled = true;
 
+        private static Dictionary<string, byte[]>? _generalAutoReply;
+        private static Dictionary<string, List<byte[]>>? _specialAutoReply;
+
         public static void SetEthernetData(List<DataGroup> dataGroups)
         {
             EthernetData = dataGroups;
@@ -32,6 +35,14 @@ namespace DOIPUtils
         public static void SetUdsAutoReply(bool enabled)
         {
             _udsAutoReplyEnabled = enabled;
+        }
+
+        public static void SetAutoReplyConfig(
+            Dictionary<string, byte[]> general,
+            Dictionary<string, List<byte[]>> special)
+        {
+            _generalAutoReply = general;
+            _specialAutoReply = special;
         }
 
         public static void StartServer(DOIP.Information info)
@@ -343,32 +354,49 @@ namespace DOIPUtils
         static void SendUdsAutoReply(NetworkStream stream, byte[] payload)
         {
             if (payload.Length < 3)
-            {
-                // 载荷太短，无法解析UDS，回退到ACK
-                SendDoipACK(stream, payload);
                 return;
-            }
 
-            const int udsOffset = 2; // 跳过source和target地址
+            const int udsOffset = 2;
             int udsLen = payload.Length - udsOffset;
             byte[] udsData = new byte[udsLen];
             Array.Copy(payload, udsOffset, udsData, 0, udsLen);
 
-            byte[]? udsResponse = BuildUdsResponse(udsData);
-            if (udsResponse == null)
+
+            // 1. 优先查 Special 配置 (匹配完整 payload, 含地址)
+            string fullKey = BytesToHexKey(payload);
+            if (_specialAutoReply != null && _specialAutoReply.TryGetValue(fullKey, out List<byte[]>? specialResps))
             {
-                SendDoipACK(stream, payload);
+                foreach (var respPayload in specialResps)
+                    SendFullDoipDiagnosticMessage(stream, respPayload);
                 return;
             }
 
-            // 构造诊断响应载荷: [source 1B] [target 1B] [UDS响应]
-            // 交换源/目标地址
+
+            // 2. 查 General 配置 (匹配 UDS 数据部分)
+            string udsKey = BytesToHexKey(udsData);
+            if (_generalAutoReply != null && _generalAutoReply.TryGetValue(udsKey, out byte[]? genResp))
+            {
+                SendSingleUdsResponse(stream, payload, genResp);
+                return;
+            }
+
+ 
+
+            // 3. 兜底: 硬编码逻辑
+            byte[]? udsResponse = BuildUdsResponse(udsData);
+            if (udsResponse == null)
+                return;
+
+            SendSingleUdsResponse(stream, payload, udsResponse);
+        }
+
+        static void SendSingleUdsResponse(NetworkStream stream, byte[] requestPayload, byte[] udsResponse)
+        {
             byte[] responsePayload = new byte[2 + udsResponse.Length];
-            responsePayload[0] = payload[1]; // 新source = 旧target
-            responsePayload[1] = payload[0]; // 新target = 旧source
+            responsePayload[0] = requestPayload[1]; // 交换源/目标
+            responsePayload[1] = requestPayload[0];
             Array.Copy(udsResponse, 0, responsePayload, 2, udsResponse.Length);
 
-            // 构造DoIP头 (6字节: 4B长度 + 2B类型)
             int totalLen = responsePayload.Length;
             byte[] response = new byte[6 + totalLen];
             response[0] = (byte)(totalLen >> 24);
@@ -376,13 +404,33 @@ namespace DOIPUtils
             response[2] = (byte)(totalLen >> 8);
             response[3] = (byte)(totalLen);
             response[4] = 0x00;
-            response[5] = 0x01; // 诊断消息类型
+            response[5] = 0x01;
 
             Array.Copy(responsePayload, 0, response, 6, totalLen);
 
             stream.Write(response, 0, response.Length);
             LogHelper.Write($"[send]", response);
             DOIP.RaiseUdsAutoReplySent(response);
+        }
+
+        static void SendFullDoipDiagnosticMessage(NetworkStream stream, byte[] fullPayload)
+        {
+            int totalLen = fullPayload.Length;
+            byte[] response = new byte[4 + totalLen];
+            response[0] = (byte)(totalLen >> 24);
+            response[1] = (byte)(totalLen >> 16);
+            response[2] = (byte)(totalLen >> 8);
+            response[3] = (byte)(totalLen);
+            Array.Copy(fullPayload, 0, response, 4, totalLen);
+
+            stream.Write(response, 0, response.Length);
+            LogHelper.Write($"[send]", response);
+            DOIP.RaiseUdsAutoReplySent(response);
+        }
+
+        static string BytesToHexKey(byte[] data)
+        {
+            return string.Concat(data.Select(b => b.ToString("X2")));
         }
 
         /// <summary>
@@ -416,7 +464,7 @@ namespace DOIPUtils
                 case 0x2E:
                     return BuildPositiveResponse(0x2E, reqData, 3);
                 case 0x31:
-                    return BuildPositiveResponse(0x31, reqData, 3);
+                    return BuildPositiveResponse(0x31, reqData, reqData.Length);
                 case 0x27:
                     return BuildPositiveResponse(0x27, reqData, 6);
                 default:

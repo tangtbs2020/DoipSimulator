@@ -48,6 +48,7 @@
             label2 = new Label();
             checkBoxAutoReply = new CheckBox();
             checkBoxUdsAutoReply = new CheckBox();
+            checkBoxLengthHeader = new CheckBox();
             buttonClear = new Button();
             buttonHide = new Button();
             labelFilePath = new Label();
@@ -137,6 +138,7 @@
             groupBox1.Controls.Add(ComboBoxIP);
             groupBox1.Controls.Add(checkBoxAutoReply);
             groupBox1.Controls.Add(checkBoxUdsAutoReply);
+            groupBox1.Controls.Add(checkBoxLengthHeader);
             groupBox1.Location = new Point(3, 12);
             groupBox1.Name = "groupBox1";
             groupBox1.Size = new Size(573, 165);
@@ -239,7 +241,18 @@
             checkBoxUdsAutoReply.UseVisualStyleBackColor = true;
             checkBoxUdsAutoReply.Checked = true;
             checkBoxUdsAutoReply.CheckedChanged += checkBoxUdsAutoReply_CheckedChanged;
-            // 
+            //
+            // checkBoxLengthHeader
+            //
+            checkBoxLengthHeader.AutoSize = true;
+            checkBoxLengthHeader.Location = new Point(245, 120);
+            checkBoxLengthHeader.Name = "checkBoxLengthHeader";
+            checkBoxLengthHeader.Size = new Size(87, 21);
+            checkBoxLengthHeader.TabIndex = 9;
+            checkBoxLengthHeader.Text = "有长度头";
+            checkBoxLengthHeader.UseVisualStyleBackColor = true;
+            checkBoxLengthHeader.Checked = true;
+            //
             // buttonClear
             // 
             buttonClear.Location = new Point(663, 485);
@@ -307,6 +320,7 @@
         private TextBox textBoxMAC;
         private Label label5;
         private CheckBox checkBoxAutoReply;
+        private CheckBox checkBoxLengthHeader;
         private Button buttonClear;
         private Button buttonHide;
         private Label labelFilePath;

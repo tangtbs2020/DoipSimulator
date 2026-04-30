@@ -48,5 +48,12 @@ namespace DOIPUtils
         {
             DoIPServer.SetUdsAutoReply(enabled);
         }
+
+        public static void SetAutoReplyConfig(
+            Dictionary<string, byte[]> general,
+            Dictionary<string, List<byte[]>> special)
+        {
+            DoIPServer.SetAutoReplyConfig(general, special);
+        }
     }
 }
