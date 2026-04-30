@@ -6,11 +6,16 @@ namespace DOIPUtils
     {
         public static List<DataGroup> ParseFile(string filePath)
         {
+            return ParseFile(filePath, hasLengthHeader: true);
+        }
+
+        public static List<DataGroup> ParseFile(string filePath, bool hasLengthHeader)
+        {
             try
             {
                 string content = File.ReadAllText(filePath);
-                // 使用正则表达式匹配 Req 和 Ans 及其后的数据
-                // 匹配模式：Req: 或 Ans: 后跟至少一个空格，然后是十六进制字符组（如 00 00 00...）
+                content = Regex.Replace(content, @"(Ans:\s+)1N\s+", "$1", RegexOptions.Multiline);
+
                 Regex regex = new Regex(@"(Req|Ans):\s+(([0-9A-Fa-f]{2}\s*)+)", RegexOptions.Multiline);
                 MatchCollection matches = regex.Matches(content);
 
@@ -19,41 +24,48 @@ namespace DOIPUtils
 
                 foreach (Match match in matches)
                 {
-                    string type = match.Groups[1].Value; // "Req" or "Ans"
+                    string type = match.Groups[1].Value;
                     string hexData = match.Groups[2].Value.Trim();
 
-                    var binaryData = HexStringToBinary(hexData, " "); // 将十六进制字符串转换为二进制数据
+                    var binaryData = HexStringToBinary(hexData, " ");
+                    if (!hasLengthHeader)
+                        binaryData = PrependDoipHeader(binaryData);
 
                     if (type == "Req")
                     {
-                        // 遇到新的 Req，保存上一组（如果有数据），并创建新组
                         if (currentGroup != null && (currentGroup.RequestData != null || currentGroup.ResponseData.Count > 0))
-                        {
                             groups.Add(currentGroup);
-                        }
                         currentGroup = new DataGroup();
                         currentGroup.RequestData = binaryData;
                     }
 
                     if (currentGroup != null && type == "Ans")
                     {
-                        // 将 Ans 数据添加到当前组的响应列表中
                         currentGroup.ResponseData.Add(binaryData);
                     }
                 }
 
-                // 添加最后一组
                 if (currentGroup != null && (currentGroup.RequestData != null || currentGroup.ResponseData.Count > 0))
-                {
                     groups.Add(currentGroup);
-                }
                 return groups;
             }
             catch (Exception ex)
             {
                 throw new Exception($"处理文件{filePath}发生错误：{ex.Message}");
             }
+        }
 
+        private static byte[] PrependDoipHeader(byte[] payload)
+        {
+            int len = payload.Length;
+            byte[] result = new byte[len + 4];
+            int iDataLen = len - 2; // 减去2字节的协议标识
+            result[0] = (byte)(iDataLen >> 24);
+            result[1] = (byte)(iDataLen >> 16);
+            result[2] = (byte)(iDataLen >> 8);
+            result[3] = (byte)(iDataLen);
+            Array.Copy(payload, 0, result, 4, len);
+            return result;
         }
 
         // 辅助方法：将连续的16进制字符串格式化为带空格的形式 (例如: "0001" -> "00 01")

@@ -114,7 +114,7 @@ namespace DoipSimulator
             }
         }
 
-        private void buttonConnect_Click(object sender, EventArgs e)
+        private void buttonConnect_Click(object? sender, EventArgs e)
         {
             if (_serverRunning)
             {
@@ -140,7 +140,7 @@ namespace DoipSimulator
                 return;
             }
 
-            var listData = EthernetDataParser.ParseFile(strPath);
+            var listData = EthernetDataParser.ParseFile(strPath, checkBoxLengthHeader.Checked);
             DOIP.SetEthernetData(listData);
             var info = new DOIP.Information();
             string? IP = ComboBoxIP.SelectedItem as string;
@@ -186,6 +186,13 @@ namespace DoipSimulator
 
             info.MAC = mac;
 
+            // 每次连接时重新加载自动回复配置
+            var autoReplyCfg = AppConfig.BuildAutoReplyConfig();
+            if (autoReplyCfg != null)
+            {
+                DOIP.SetAutoReplyConfig(autoReplyCfg.Value.general, autoReplyCfg.Value.special);
+            }
+
             DOIP.StartDoipServer(info);
             _serverRunning = true;
             SetControlsEnabled(false);
@@ -207,6 +214,7 @@ namespace DoipSimulator
             // ACK复选框在UDS自动回复开启时强制禁用
             checkBoxAutoReply.Enabled = enabled && !checkBoxUdsAutoReply.Checked;
             checkBoxUdsAutoReply.Enabled = enabled;
+            checkBoxLengthHeader.Enabled = enabled;
         }
 
         private void MainWindow_FormClosing(object? sender, FormClosingEventArgs e)
@@ -218,7 +226,7 @@ namespace DoipSimulator
             }
         }
 
-        private void checkBoxUdsAutoReply_CheckedChanged(object sender, EventArgs e)
+        private void checkBoxUdsAutoReply_CheckedChanged(object? sender, EventArgs e)
         {
             bool enabled = checkBoxUdsAutoReply.Checked;
             DOIP.SetUdsAutoReply(enabled);
@@ -234,17 +242,17 @@ namespace DoipSimulator
                 checkBoxAutoReply.Enabled = true;
             }
         }
-        private void checkBoxAutoReply_CheckedChanged(object sender, EventArgs e)
+        private void checkBoxAutoReply_CheckedChanged(object? sender, EventArgs e)
         {
             DOIP.SetAutoReply(checkBoxAutoReply.Checked);
         }
 
-        private void buttonClear_Click(object sender, EventArgs e)
+        private void buttonClear_Click(object? sender, EventArgs e)
         {
             richTextBoxContent.Clear();
         }
 
-        private void TreeViewFiles_AfterSelect(object sender, TreeViewEventArgs e)
+        private void TreeViewFiles_AfterSelect(object? sender, TreeViewEventArgs e)
         {
             var parts = new List<string>();
             TreeNode? node = e.Node;
@@ -257,18 +265,18 @@ namespace DoipSimulator
             labelFilePath.Text = string.Join(" / ", parts);
         }
 
-        private void toolStripMenuItemRefresh_Click(object sender, EventArgs e)
+        private void toolStripMenuItemRefresh_Click(object? sender, EventArgs e)
         {
             LoadDirectory(_dataDbPath);
         }
 
-        private void buttonHide_Click(object sender, EventArgs e)
+        private void buttonHide_Click(object? sender, EventArgs e)
         {
             _logHidden = !_logHidden;
             buttonHide.Text = _logHidden ? "显示" : "隐藏";
         }
 
-        private void buttonUpdateIP_Click(object sender, EventArgs e)
+        private void buttonUpdateIP_Click(object? sender, EventArgs e)
         {
             initIPList();
         }
