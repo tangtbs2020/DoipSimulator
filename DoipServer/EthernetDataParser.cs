@@ -14,8 +14,8 @@ namespace DOIPUtils
             try
             {
                 string content = File.ReadAllText(filePath);
-                content = Regex.Replace(content, @"(Ans:\s+)1N\s+", "$1", RegexOptions.Multiline);
-
+                // 使用正则表达式匹配 Req 和 Ans 及其后的数据
+                // 匹配模式：Req: 或 Ans: 后跟至少一个空格，然后是十六进制字符组（如 00 00 00...）
                 Regex regex = new Regex(@"(Req|Ans):\s+(([0-9A-Fa-f]{2}\s*)+)", RegexOptions.Multiline);
                 MatchCollection matches = regex.Matches(content);
 
