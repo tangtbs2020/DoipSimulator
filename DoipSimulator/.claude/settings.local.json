@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(winget search *)",
+      "Bash(cmd.exe /c \"winget search SQLiteStudio\")",
+      "Bash(cmd.exe *)"
+    ]
+  }
+}
