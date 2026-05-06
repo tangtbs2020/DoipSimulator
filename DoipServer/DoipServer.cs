@@ -98,7 +98,7 @@ namespace DOIPUtils
         {
             try
             {
-                _udpClient = new UdpClient(DoipInfo.UDPPort);
+                _udpClient = new UdpClient(new IPEndPoint(IPAddress.Parse(DoipInfo.IP), DoipInfo.UDPPort));
                 IPEndPoint remoteEndpoint = new IPEndPoint(IPAddress.Any, 0);
 
                 Console.WriteLine("[UDP] 开始监听广播...");

@@ -1,6 +1,7 @@
 {
   "permissions": {
     "allow": [
+<<<<<<< HEAD
       "Bash(dotnet build *)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
@@ -8,6 +9,23 @@
       "Bash(start *)",
       "Bash(dotnet run *)",
       "Bash(dotnet clean *)"
+=======
+      "Bash(git *)",
+      "Bash(start *)",
+      "Bash(cmdkey /list)",
+      "Bash(cmdkey *)",
+      "Bash(\"C:/Users/ts/AppData/Local/Programs/Git Credential Manager/git-credential-manager.exe\" erase)",
+      "Bash(dotnet build *)",
+      "Bash(GIT_CURL_VERBOSE=1 GIT_TRACE=1 git push origin master)",
+      "Bash(timeout 5 ping *)",
+      "Bash(clip.exe)",
+      "Bash(awk *)",
+      "Bash(sed -n '137,139p' \"F:/code/csharp/DoipSimulator/DoipSimulator/MainWindow.Designer.cs\")",
+      "Bash(sed -n '230,243p' \"F:/code/csharp/DoipSimulator/DoipSimulator/MainWindow.Designer.cs\")",
+      "Bash(sed -n '296,298p' \"F:/code/csharp/DoipSimulator/DoipSimulator/MainWindow.Designer.cs\")",
+      "Bash(head -40 \"F:/code/csharp/DoipSimulator/DoipServer/DOIP.cs\")",
+      "Bash(mv /tmp/doip_temp.cs \"F:/code/csharp/DoipSimulator/DoipServer/DOIP.cs\")"
+>>>>>>> 9e6e9f9e34b03868bc761b63959029129b3e68b4
     ]
   }
 }

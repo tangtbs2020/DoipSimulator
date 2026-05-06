@@ -14,10 +14,7 @@ namespace DOIPUtils
             try
             {
                 string content = File.ReadAllText(filePath);
-
-
                 content = Regex.Replace(content, @"(Ans:\s+)1N\s+", "$1", RegexOptions.Multiline);
-
                 Regex regex = new Regex(@"(Req|Ans):\s+(([0-9A-Fa-f]{2}\s*)+)", RegexOptions.Multiline);
                 MatchCollection matches = regex.Matches(content);
 
