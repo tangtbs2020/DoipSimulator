@@ -33,6 +33,7 @@
             treeViewFiles = new TreeView();
             contextMenuStrip = new ContextMenuStrip(components);
             toolStripMenuItemRefresh = new ToolStripMenuItem();
+            buttonOpen = new Button();
             buttonConnect = new Button();
             ComboBoxIP = new ComboBox();
             buttonUpdateIP = new Button();
@@ -94,7 +95,17 @@
             buttonConnect.Text = "连接";
             buttonConnect.UseVisualStyleBackColor = true;
             buttonConnect.Click += buttonConnect_Click;
-            // 
+            //
+            // buttonOpen
+            //
+            buttonOpen.Location = new Point(825, 485);
+            buttonOpen.Name = "buttonOpen";
+            buttonOpen.Size = new Size(75, 23);
+            buttonOpen.TabIndex = 3;
+            buttonOpen.Text = "打开";
+            buttonOpen.UseVisualStyleBackColor = true;
+            buttonOpen.Click += buttonOpen_Click;
+            //
             // ComboBoxIP
             // 
             ComboBoxIP.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -286,6 +297,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(910, 544);
             Controls.Add(groupBox1);
+            Controls.Add(buttonOpen);
             Controls.Add(buttonConnect);
             Controls.Add(buttonClear);
             Controls.Add(buttonHide);
@@ -305,6 +317,7 @@
         #endregion
         private RichTextBox richTextBoxContent;
         private TreeView treeViewFiles;
+        private Button buttonOpen;
         private Button buttonConnect;
         private CheckBox checkBoxUdsAutoReply;
         private ComboBox ComboBoxIP;

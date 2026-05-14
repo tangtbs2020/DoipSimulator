@@ -1,4 +1,5 @@
 using DOIPUtils;
+using System.Diagnostics;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
@@ -274,6 +275,37 @@ namespace DoipSimulator
         {
             _logHidden = !_logHidden;
             buttonHide.Text = _logHidden ? "显示" : "隐藏";
+        }
+
+        private void buttonOpen_Click(object? sender, EventArgs e)
+        {
+            var selectedNode = treeViewFiles.SelectedNode;
+            if (selectedNode?.Tag is not string path) return;
+
+            if (Directory.Exists(path))
+            {
+                Process.Start("explorer.exe", $"\"{path}\"");
+            }
+            else if (File.Exists(path))
+            {
+                var ultraEditPath = FindUltraEdit();
+                if (ultraEditPath != null)
+                    Process.Start(ultraEditPath, $"\"{path}\"");
+                else
+                    Process.Start(new ProcessStartInfo(path) { UseShellExecute = true });
+            }
+        }
+
+        private static string? FindUltraEdit()
+        {
+            string[] candidates =
+            {
+                @"C:\Program Files\IDM Computer Solutions\UltraEdit\uedit64.exe",
+                @"C:\Program Files (x86)\IDM Computer Solutions\UltraEdit\uedit32.exe",
+            };
+            foreach (var p in candidates)
+                if (File.Exists(p)) return p;
+            return null;
         }
 
         private void buttonUpdateIP_Click(object? sender, EventArgs e)
